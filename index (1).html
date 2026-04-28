@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>デジタル蒲田民</title>
+<link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #1a0a2e; --panel: #0d1117; --yellow: #ffd700; --orange: #ff8c00;
+  --cyan: #00e5ff; --green: #00e04a; --pink: #ff6eb4; --purple: #cc88ff;
+  --white: #ffffff; --dim: #444466; --px: 4px;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  background: var(--bg); font-family: 'DotGothic16', 'Press Start 2P', monospace;
+  height: 100dvh; overflow: hidden; display: flex; flex-direction: column;
+  image-rendering: pixelated; cursor: none;
+}
+#cursor { position:fixed; pointer-events:none; z-index:9999; transform:translate(-8px,-6px); }
+#cursor::before {
+  content:''; display:block; width:2px; height:2px; position:absolute; top:0; left:0;
+  image-rendering:pixelated;
+  /* 餃子ピクセルアート 14×10ドット (1ドット=2px) */
+  box-shadow:
+    4px 0 0 #e8c87a, 6px 0 0 #e8c87a, 8px 0 0 #e8c87a, 10px 0 0 #e8c87a, 12px 0 0 #e8c87a, 14px 0 0 #e8c87a, 16px 0 0 #e8c87a, 18px 0 0 #e8c87a,
+    2px 2px 0 #e8c87a, 4px 2px 0 #f5dfa0, 6px 2px 0 #f5dfa0, 8px 2px 0 #fff8e0, 10px 2px 0 #fff8e0, 12px 2px 0 #f5dfa0, 14px 2px 0 #f5dfa0, 16px 2px 0 #f5dfa0, 18px 2px 0 #f5dfa0, 20px 2px 0 #e8c87a,
+    0px 4px 0 #d4a843, 2px 4px 0 #e8c87a, 4px 4px 0 #f5dfa0, 6px 4px 0 #fff8e0, 8px 4px 0 #fff8e0, 10px 4px 0 #fff8e0, 12px 4px 0 #fff8e0, 14px 4px 0 #fff8e0, 16px 4px 0 #f5dfa0, 18px 4px 0 #e8c87a, 20px 4px 0 #d4a843, 22px 4px 0 #c49030,
+    0px 6px 0 #c49030, 2px 6px 0 #d4a843, 4px 6px 0 #e8c87a, 6px 6px 0 #f5dfa0, 8px 6px 0 #fff8e0, 10px 6px 0 #fff8e0, 12px 6px 0 #fff8e0, 14px 6px 0 #f5dfa0, 16px 6px 0 #e8c87a, 18px 6px 0 #d4a843, 20px 6px 0 #c49030, 22px 6px 0 #a87820,
+    2px 8px 0 #c49030, 4px 8px 0 #d4a843, 6px 8px 0 #e8c87a, 8px 8px 0 #e8c87a, 10px 8px 0 #e8c87a, 12px 8px 0 #e8c87a, 14px 8px 0 #d4a843, 16px 8px 0 #c49030, 18px 8px 0 #a87820, 20px 8px 0 #a87820,
+    4px 10px 0 #c49030, 6px 10px 0 #c49030, 8px 10px 0 #d4a843, 10px 10px 0 #d4a843, 12px 10px 0 #c49030, 14px 10px 0 #a87820, 16px 10px 0 #a87820,
+    6px 12px 0 #a87820, 8px 12px 0 #a87820, 10px 12px 0 #a87820,
+    /* ひだ */
+    4px 4px 0 #b08030, 8px 2px 0 #b08030, 12px 2px 0 #b08030, 16px 4px 0 #b08030, 20px 6px 0 #b08030,
+    /* 焼き色 */
+    6px 10px 0 #c86820, 8px 10px 0 #e07820, 10px 10px 0 #e07820, 12px 10px 0 #c86820;
+}
+.pf { font-family:'Press Start 2P',monospace; image-rendering:pixelated; }
+.df { font-family:'DotGothic16',monospace; }
+
+/* SCENE */
+.scene {
+  flex:0 0 auto; height:clamp(88px,19vh,136px); position:relative;
+  background:linear-gradient(180deg,#5599ee 0%,#88bbff 40%,#aad4ff 75%,#c8e8ff 100%);
+  overflow:hidden; border-bottom:4px solid #000;
+}
+.star-px {
+  position:absolute; width:8px; height:4px; background:rgba(255,255,255,0.85);
+  border-radius:4px;
+  animation:twinkle 3s infinite alternate;
+  box-shadow:4px 0 0 rgba(255,255,255,0.6),-4px 0 0 rgba(255,255,255,0.6);
+}
+.star-px.gold { background:rgba(255,255,255,0.95); width:12px; }
+.star-px.big { box-shadow:6px 0 0 rgba(255,255,255,0.7),-6px 0 0 rgba(255,255,255,0.7),0 4px 0 rgba(255,255,255,0.5); }
+@keyframes twinkle { from{opacity:1;} to{opacity:0.15;} }
+
+.title-wrap { position:absolute; top:50%; left:50%; transform:translate(-50%,-55%); text-align:center; z-index:10; }
+.title-deco { display:flex; align-items:center; justify-content:center; gap:8px; margin-bottom:6px; }
+.title-deco-line { height:2px; width:clamp(20px,5vw,48px); background:repeating-linear-gradient(90deg,#3366cc 0 4px,transparent 4px 8px); }
+.title-diamond { width:10px; height:10px; background:#3366cc; transform:rotate(45deg); box-shadow:0 0 8px rgba(100,160,255,0.8); }
+.main-title {
+  font-family:'Press Start 2P',monospace; font-size:clamp(8px,2vw,16px);
+  color:#1a2a6e; text-shadow:3px 3px 0 rgba(255,255,255,0.8),1px 1px 0 #fff,0 0 16px rgba(255,255,255,0.6);
+  letter-spacing:2px; line-height:1; white-space:nowrap;
+}
+.sub-title {
+  font-family:'Press Start 2P',monospace; font-size:clamp(5px,1vw,8px);
+  color:#2244aa; text-shadow:1px 1px 0 rgba(255,255,255,0.7); letter-spacing:3px; margin-top:4px;
+}
+.game-start-btn {
+  display:block; margin:clamp(5px,1.2vh,10px) auto 0;
+  padding:clamp(5px,1vh,8px) clamp(12px,2vw,20px);
+  background:#1a0a2e; border-top:3px solid var(--yellow); border-left:3px solid var(--yellow);
+  border-right:3px solid #665500; border-bottom:3px solid #665500;
+  color:var(--yellow); font-family:'Press Start 2P',monospace; font-size:clamp(5px,1vw,8px);
+  letter-spacing:2px; cursor:none; text-shadow:1px 1px 0 #000;
+  animation:btnPulse 1.2s step-end infinite;
+}
+.game-start-btn:hover { border-top:3px solid #665500; border-left:3px solid #665500; border-right:3px solid var(--yellow); border-bottom:3px solid var(--yellow); transform:translate(2px,2px); }
+@keyframes btnPulse { 0%,100%{opacity:1;} 50%{opacity:0.5;} }
+
+.game-wrap { position:absolute; inset:0; bottom:16px; display:flex; flex-direction:column; }
+#gameCanvas { position:absolute; inset:0; width:100%; height:100%; image-rendering:pixelated; }
+.game-ui { position:absolute; top:clamp(4px,0.8vh,8px); right:clamp(8px,1.5vw,16px); display:flex; gap:12px; z-index:10; }
+.game-ui span { font-family:'Press Start 2P',monospace; font-size:clamp(5px,0.9vw,8px); color:var(--yellow); text-shadow:1px 1px 0 #000; }
+#game-hi { color:#556 !important; }
+.game-over-msg {
+  display:none; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+  font-family:'Press Start 2P',monospace; font-size:clamp(6px,1vw,9px);
+  color:var(--yellow); text-shadow:2px 2px 0 #000; letter-spacing:2px; z-index:10;
+  text-align:center; line-height:2.2; background:rgba(0,0,0,0.82);
+  padding:clamp(8px,1.5vh,14px) clamp(10px,2vw,18px); border:2px solid var(--yellow);
+}
+.ground-bar { position:absolute; bottom:0; left:0; right:0; height:16px; background:#1a5c1a; border-top:4px solid #2d8c2d; }
+.ground-bar::before { content:''; position:absolute; inset:0; background:repeating-linear-gradient(90deg,transparent 0 28px,rgba(0,0,0,0.3) 28px 32px); }
+
+/* MAIN */
+.main-content { flex:1; display:grid; grid-template-columns:1fr 1fr; overflow:hidden; }
+
+/* LEFT */
+.left-panel { background:#080c14; border-right:4px solid #000; display:flex; flex-direction:column; overflow:hidden; }
+.panel-hdr {
+  background:#0f0520; border-bottom:4px solid #000;
+  padding:clamp(5px,1vh,8px) clamp(8px,1.4vw,14px);
+  display:flex; align-items:center; gap:8px;
+}
+.panel-hdr .pf { font-size:clamp(5px,0.9vw,8px); color:var(--cyan); text-shadow:1px 1px 0 #000; letter-spacing:2px; }
+.blink-cur { display:inline-block; width:8px; height:10px; background:var(--yellow); animation:blink 1s step-end infinite; box-shadow:0 0 4px var(--yellow); }
+@keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0;} }
+.buttons-area { flex:1; padding:clamp(7px,1.3vh,12px) clamp(8px,1.4vw,13px); display:flex; flex-direction:column; gap:clamp(5px,1vh,9px); overflow-y:auto; scrollbar-width:none; }
+
+.pxbtn {
+  display:flex; align-items:center; gap:clamp(8px,1.2vw,12px);
+  padding:clamp(8px,1.4vh,12px) clamp(10px,1.7vw,14px);
+  background:var(--bb,#0e1a2e); border:none;
+  border-top:3px solid var(--bl,#3366aa); border-left:3px solid var(--bl,#3366aa);
+  border-right:3px solid var(--bd,#001133); border-bottom:3px solid var(--bd,#001133);
+  cursor:none; width:100%; transition:transform 0.05s; position:relative; overflow:hidden;
+}
+.pxbtn::after { content:''; position:absolute; top:0; left:-100%; width:40%; height:100%; background:linear-gradient(90deg,transparent,rgba(255,255,255,0.04),transparent); transition:left 0.3s; }
+.pxbtn:hover::after { left:150%; }
+.pxbtn:hover { border-top:3px solid var(--bd,#001133); border-left:3px solid var(--bd,#001133); border-right:3px solid var(--bl,#3366aa); border-bottom:3px solid var(--bl,#3366aa); transform:translate(2px,2px); }
+.pxbtn:active { transform:translate(3px,3px); }
+.btn-icon-wrap { flex-shrink:0; width:clamp(24px,4vw,34px); height:clamp(24px,4vw,34px); display:flex; align-items:center; justify-content:center; }
+.btn-texts { flex:1; text-align:left; }
+.btn-name { font-family:'DotGothic16',monospace; font-size:clamp(10px,1.6vw,14px); color:var(--bt,#88bbff); text-shadow:1px 1px 0 #000; display:block; line-height:1.2; }
+.btn-eng { font-family:'Press Start 2P',monospace; font-size:clamp(4px,0.7vw,6px); color:var(--bs,#446688); text-shadow:1px 1px 0 #000; display:block; margin-top:3px; letter-spacing:1px; }
+.btn-arr { font-family:'Press Start 2P',monospace; font-size:clamp(8px,1.2vw,11px); color:var(--bt,#88bbff); opacity:0.8; }
+.partner-sep { font-family:'Press Start 2P',monospace; font-size:clamp(4px,0.65vw,6px); color:#334; text-align:center; letter-spacing:2px; padding:2px 0; border-top:1px dashed #223; border-bottom:1px dashed #223; }
+
+.skill-tags { display:flex; flex-wrap:wrap; gap:clamp(3px,0.5vw,5px); padding:clamp(4px,0.7vh,7px) clamp(4px,0.7vw,6px); background:#0a0f1a; border-left:3px solid #cc6600; border-bottom:2px solid #1a1a2e; margin-top:-2px; }
+.skill-tag { font-family:'DotGothic16',monospace; font-size:clamp(8px,1.1vw,10px); color:#cc8833; background:#1a0f00; border:1px solid #442200; border-top:1px solid #664400; border-left:1px solid #664400; padding:2px clamp(4px,0.6vw,7px); text-shadow:1px 1px 0 #000; white-space:nowrap; cursor:none; transition:background 0.1s,color 0.1s; }
+.skill-tag:hover { background:#331500; color:#ffaa44; border-color:#ff8800; }
+
+.sns-row { display:flex; gap:clamp(3px,0.5vw,5px); padding:clamp(5px,0.9vh,8px) clamp(8px,1.4vw,13px); background:#060910; border-top:4px solid #000; }
+.sns-btn { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; padding:clamp(4px,0.8vh,7px) 2px; background:#0f1625; border:2px solid #1a2a3a; border-top:2px solid #2a3a4a; border-left:2px solid #2a3a4a; cursor:none; text-decoration:none; transition:transform 0.05s; }
+.sns-btn:hover { transform:translate(1px,1px); border-top:2px solid #111; border-left:2px solid #111; }
+.sns-label { font-family:'Press Start 2P',monospace; font-size:clamp(4px,0.6vw,6px); color:#556; text-shadow:1px 1px 0 #000; }
+
+/* RIGHT */
+.right-panel { background:#080c14; display:flex; flex-direction:column; overflow:hidden; }
+.tabs { display:flex; background:#060910; border-bottom:4px solid #000; }
+.tab { flex:1; padding:clamp(4px,0.8vh,7px) 2px; font-family:'Press Start 2P',monospace; font-size:clamp(4px,0.7vw,6px); color:#334; background:#060910; border:none; border-right:2px solid #000; cursor:none; text-shadow:1px 1px 0 #000; transition:background 0.1s; text-align:center; display:flex; align-items:center; justify-content:center; gap:5px; }
+.tab.active { background:#0f0520; color:var(--yellow); border-bottom:4px solid var(--yellow); margin-bottom:-4px; }
+.tab-content { display:none; flex:1; overflow:hidden; }
+.tab-content.active { display:flex; flex-direction:column; }
+.cal-wrap { flex:1; overflow:hidden; background:#000; }
+.cal-wrap iframe { width:100%; height:100%; border:none; }
+
+.videos-area { flex:1; overflow-y:auto; padding:clamp(7px,1.3vh,11px); scrollbar-width:thin; scrollbar-color:#1a2a3a #000; }
+.vsec-title { font-family:'Press Start 2P',monospace; font-size:clamp(5px,0.75vw,7px); color:var(--pink); text-shadow:1px 1px 0 #000; margin-bottom:clamp(5px,0.9vh,8px); padding:4px 0 4px 8px; border-left:4px solid var(--pink); display:flex; align-items:center; gap:6px; }
+.video-grid { display:grid; grid-template-columns:1fr 1fr; gap:clamp(4px,0.7vh,6px); margin-bottom:clamp(9px,1.7vh,13px); }
+.video-thumb { background:#0f1625; border:2px solid #1a2a3a; border-top:2px solid #2a3a4a; cursor:none; text-decoration:none; display:block; overflow:hidden; transition:transform 0.05s; }
+.video-thumb:hover { transform:translate(1px,1px); border-top:2px solid #0a1020; }
+.thumb-img { width:100%; aspect-ratio:16/9; background:#050810; position:relative; overflow:hidden; }
+.thumb-img img { width:100%; height:100%; object-fit:cover; }
+.play-ov { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.5); opacity:0; transition:opacity 0.1s; }
+.video-thumb:hover .play-ov { opacity:1; }
+.play-icon-wrap { width:28px; height:28px; display:flex; align-items:center; justify-content:center; }
+.thumb-title { padding:clamp(3px,0.5vh,5px) clamp(4px,0.7vw,6px); font-family:'DotGothic16',monospace; font-size:clamp(8px,1.1vw,10px); color:#aac; text-shadow:1px 1px 0 #000; line-height:1.4; }
+.media-item { display:flex; align-items:center; gap:8px; padding:clamp(6px,1vh,9px) clamp(8px,1.2vw,11px); background:#0f1625; border:2px solid #1a2a3a; border-top:2px solid #2a3a4a; margin-bottom:5px; text-decoration:none; transition:transform 0.05s; }
+.media-item:hover { transform:translate(1px,1px); border-top:2px solid #0a1020; }
+.media-icon-wrap { flex-shrink:0; width:20px; height:20px; display:flex; align-items:center; justify-content:center; }
+.media-text { flex:1; }
+.media-title { font-family:'DotGothic16',monospace; font-size:clamp(9px,1.2vw,11px); color:var(--cyan); text-shadow:1px 1px 0 #000; display:block; }
+.media-sub { font-family:'Press Start 2P',monospace; font-size:clamp(4px,0.6vw,6px); color:#446; text-shadow:1px 1px 0 #000; display:block; margin-top:3px; }
+.media-arr { font-family:'Press Start 2P',monospace; font-size:9px; color:#446; }
+
+/* STATUS */
+.status-bar { flex:0 0 auto; background:#060910; border-top:4px solid #000; padding:clamp(2px,0.4vh,4px) clamp(8px,1.4vw,13px); display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.status-txt { font-family:'Press Start 2P',monospace; font-size:clamp(4px,0.6vw,6px); color:var(--green); text-shadow:0 0 6px var(--green); animation:blink 1.4s step-end infinite; }
+.coin-row { display:flex; align-items:center; gap:6px; font-family:'Press Start 2P',monospace; font-size:clamp(4px,0.6vw,6px); color:var(--yellow); text-shadow:1px 1px 0 #000; }
+.coin { animation:coinSpin 0.6s steps(2) infinite; }
+@keyframes coinSpin { from{transform:scaleX(1);} to{transform:scaleX(0.1);} }
+
+/* POPUP */
+.overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.9); z-index:200; align-items:center; justify-content:center; padding:16px; }
+.overlay.active { display:flex; }
+.popup { width:min(460px,92vw); max-height:86dvh; background:#080c14; border-top:4px solid var(--pc,var(--yellow)); border-left:4px solid var(--pc,var(--yellow)); border-right:4px solid #000; border-bottom:4px solid #000; overflow-y:auto; scrollbar-width:thin; scrollbar-color:#1a2a3a #000; animation:popIn 0.12s steps(3) forwards; }
+@keyframes popIn { from{transform:scale(0.8);opacity:0;} to{transform:scale(1);opacity:1;} }
+.popup-hdr { background:var(--pc,var(--yellow)); padding:clamp(6px,1.1vh,10px) clamp(10px,1.8vw,15px); display:flex; align-items:center; justify-content:space-between; }
+.popup-hdr-title { font-family:'Press Start 2P',monospace; font-size:clamp(6px,1vw,9px); color:#000; }
+.popup-close-btn { font-family:'Press Start 2P',monospace; font-size:10px; color:#000; background:#fff; border-top:2px solid #fff; border-left:2px solid #fff; border-right:2px solid #666; border-bottom:2px solid #666; width:22px; height:22px; cursor:none; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.popup-close-btn:hover { border-top:2px solid #666; border-left:2px solid #666; border-right:2px solid #fff; border-bottom:2px solid #fff; }
+.popup-body { padding:clamp(14px,2.4vh,22px) clamp(16px,2.6vw,24px); }
+.popup-sprite-area { display:flex; justify-content:center; margin-bottom:12px; }
+.popup-name { font-family:'DotGothic16',monospace; font-size:clamp(14px,2.3vw,19px); color:var(--pc,var(--yellow)); text-shadow:2px 2px 0 #000; margin-bottom:3px; }
+.popup-eng { font-family:'Press Start 2P',monospace; font-size:clamp(5px,0.8vw,7px); color:#446; text-shadow:1px 1px 0 #000; margin-bottom:10px; letter-spacing:1px; }
+.popup-badge { display:inline-block; background:#0f0520; border:2px solid var(--pc,var(--yellow)); padding:3px 10px; margin-bottom:10px; font-family:'Press Start 2P',monospace; font-size:clamp(5px,0.75vw,6px); color:var(--pc,var(--yellow)); text-shadow:1px 1px 0 #000; }
+.popup-desc { font-family:'DotGothic16',monospace; font-size:clamp(11px,1.6vw,14px); color:#aab; line-height:1.85; margin-bottom:14px; text-shadow:1px 1px 0 #000; }
+.popup-cta { display:flex; align-items:center; justify-content:center; gap:8px; padding:clamp(9px,1.6vh,13px) 20px; background:var(--pc,var(--yellow)); border-top:3px solid rgba(255,255,255,0.35); border-left:3px solid rgba(255,255,255,0.35); border-right:3px solid rgba(0,0,0,0.5); border-bottom:3px solid rgba(0,0,0,0.5); color:#000; text-decoration:none; font-family:'Press Start 2P',monospace; font-size:clamp(6px,1vw,9px); cursor:none; transition:transform 0.05s; }
+.popup-cta:hover { transform:translate(2px,2px); }
+
+/* SPRITES */
+.sprite-lightning { width:4px; height:4px; position:relative; display:inline-block; }
+.sprite-lightning::before { content:''; display:block; width:4px; height:4px; position:absolute; image-rendering:pixelated; box-shadow:8px 0 0 var(--cyan),12px 0 0 var(--cyan),4px 4px 0 var(--cyan),8px 4px 0 var(--cyan),12px 4px 0 var(--cyan),0px 8px 0 var(--cyan),4px 8px 0 var(--cyan),8px 8px 0 var(--cyan),12px 8px 0 var(--cyan),16px 8px 0 var(--cyan),20px 8px 0 var(--cyan),8px 12px 0 var(--cyan),12px 12px 0 var(--cyan),4px 16px 0 var(--cyan),8px 16px 0 var(--cyan),4px 20px 0 var(--cyan); }
+.sprite-briefcase { width:4px; height:4px; position:relative; display:inline-block; }
+.sprite-briefcase::before { content:''; display:block; width:4px; height:4px; position:absolute; box-shadow:4px 0 0 var(--orange),8px 0 0 var(--orange),12px 0 0 var(--orange),16px 0 0 var(--orange),0px 4px 0 var(--orange),4px 4px 0 #000,8px 4px 0 #000,12px 4px 0 #000,16px 4px 0 #000,20px 4px 0 var(--orange),0px 8px 0 var(--orange),4px 8px 0 var(--orange),8px 8px 0 var(--orange),12px 8px 0 var(--orange),16px 8px 0 var(--orange),20px 8px 0 var(--orange),0px 12px 0 var(--orange),8px 12px 0 #fff,20px 12px 0 var(--orange),0px 16px 0 var(--orange),4px 16px 0 var(--orange),8px 16px 0 var(--orange),12px 16px 0 var(--orange),16px 16px 0 var(--orange),20px 16px 0 var(--orange); }
+.sprite-leaf { width:4px; height:4px; position:relative; display:inline-block; }
+.sprite-leaf::before { content:''; display:block; width:4px; height:4px; position:absolute; box-shadow:8px 0 0 var(--green),4px 4px 0 var(--green),8px 4px 0 #00a030,12px 4px 0 var(--green),0px 8px 0 var(--green),4px 8px 0 #00a030,8px 8px 0 #008020,12px 8px 0 #00a030,16px 8px 0 var(--green),4px 12px 0 var(--green),8px 12px 0 #00a030,12px 12px 0 var(--green),8px 16px 0 #008020,8px 20px 0 #006010,4px 20px 0 #006010; }
+.sprite-building { width:4px; height:4px; position:relative; display:inline-block; }
+.sprite-building::before { content:''; display:block; width:4px; height:4px; position:absolute; box-shadow:4px 0 0 var(--purple),4px 4px 0 var(--purple),0px 8px 0 var(--purple),4px 8px 0 var(--purple),8px 8px 0 #884acc,12px 8px 0 #884acc,0px 12px 0 var(--purple),4px 12px 0 #7733bb,8px 12px 0 #884acc,12px 12px 0 #dda0ff,0px 16px 0 var(--purple),4px 16px 0 var(--purple),8px 16px 0 #884acc,12px 16px 0 #884acc,0px 20px 0 var(--purple),4px 20px 0 #7733bb,8px 20px 0 #dda0ff,12px 20px 0 #884acc,0px 24px 0 var(--purple),4px 24px 0 var(--purple),8px 24px 0 #884acc,12px 24px 0 #884acc; }
+.sprite-calendar { width:4px; height:4px; position:relative; display:inline-block; }
+.sprite-calendar::before { content:''; display:block; width:4px; height:4px; position:absolute; box-shadow:0px 0 0 var(--yellow),4px 0 0 var(--yellow),8px 0 0 #000,12px 0 0 var(--yellow),16px 0 0 var(--yellow),0px 4px 0 var(--yellow),4px 4px 0 var(--yellow),8px 4px 0 var(--yellow),12px 4px 0 var(--yellow),16px 4px 0 var(--yellow),20px 4px 0 var(--yellow),0px 8px 0 var(--yellow),4px 8px 0 #fff,8px 8px 0 #fff,12px 8px 0 var(--yellow),16px 8px 0 #fff,20px 8px 0 var(--yellow),0px 12px 0 var(--yellow),4px 12px 0 var(--yellow),8px 12px 0 #fff,12px 12px 0 #fff,16px 12px 0 var(--yellow),20px 12px 0 var(--yellow),0px 16px 0 var(--yellow),4px 16px 0 #fff,8px 16px 0 var(--yellow),12px 16px 0 var(--yellow),16px 16px 0 var(--yellow),20px 16px 0 var(--yellow); }
+.sprite-film { width:4px; height:4px; position:relative; display:inline-block; }
+.sprite-film::before { content:''; display:block; width:4px; height:4px; position:absolute; box-shadow:0px 0 0 var(--pink),4px 0 0 #000,8px 0 0 var(--pink),12px 0 0 var(--pink),16px 0 0 #000,20px 0 0 var(--pink),0px 4px 0 var(--pink),4px 4px 0 var(--pink),8px 4px 0 var(--pink),12px 4px 0 var(--pink),16px 4px 0 var(--pink),20px 4px 0 var(--pink),0px 8px 0 var(--pink),4px 8px 0 #dda,8px 8px 0 #dda,12px 8px 0 var(--pink),20px 8px 0 var(--pink),0px 12px 0 var(--pink),4px 12px 0 #dda,12px 12px 0 #dda,20px 12px 0 var(--pink),0px 16px 0 var(--pink),4px 16px 0 #000,8px 16px 0 var(--pink),12px 16px 0 var(--pink),16px 16px 0 #000,20px 16px 0 var(--pink); }
+.sprite-play { width:4px; height:4px; position:relative; display:inline-block; }
+.sprite-play::before { content:''; display:block; width:4px; height:4px; position:absolute; box-shadow:0px 0 0 #fff,0px 4px 0 #fff,4px 4px 0 #fff,0px 8px 0 #fff,4px 8px 0 #fff,8px 8px 0 #fff,0px 12px 0 #fff,4px 12px 0 #fff,0px 16px 0 #fff; }
+.sprite-coin { width:4px; height:4px; position:relative; display:inline-block; animation:coinSpin 0.6s steps(2) infinite; }
+.sprite-coin::before { content:''; display:block; width:4px; height:4px; position:absolute; box-shadow:4px 0 0 var(--yellow),8px 0 0 var(--yellow),0px 4px 0 var(--yellow),4px 4px 0 #fff8aa,8px 4px 0 #fff8aa,12px 4px 0 var(--yellow),0px 8px 0 var(--yellow),4px 8px 0 #fff8aa,8px 8px 0 var(--yellow),12px 8px 0 var(--yellow),0px 12px 0 var(--yellow),4px 12px 0 #fff8aa,8px 12px 0 #fff8aa,12px 12px 0 var(--yellow),4px 16px 0 var(--yellow),8px 16px 0 var(--yellow); }
+.sprite-insta { width:4px; height:4px; position:relative; display:inline-block; }
+.sprite-insta::before { content:''; display:block; width:4px; height:4px; position:absolute; box-shadow:0px 0 0 #e1306c,4px 0 0 #e1306c,8px 0 0 #e1306c,12px 0 0 #e1306c,16px 0 0 #e1306c,0px 4px 0 #e1306c,16px 4px 0 #e1306c,0px 8px 0 #e1306c,4px 8px 0 #e1306c,8px 8px 0 #e1306c,12px 8px 0 #e1306c,16px 8px 0 #e1306c,0px 12px 0 #e1306c,8px 12px 0 #e1306c,16px 12px 0 #e1306c,0px 16px 0 #e1306c,4px 16px 0 #e1306c,8px 16px 0 #e1306c,12px 16px 0 #e1306c,16px 16px 0 #e1306c,12px 2px 0 #fff8; }
+.sprite-x { width:4px; height:4px; position:relative; display:inline-block; }
+.sprite-x::before { content:''; display:block; width:4px; height:4px; position:absolute; box-shadow:0px 0 0 #ddd,4px 0 0 #ddd,16px 0 0 #ddd,20px 0 0 #ddd,4px 4px 0 #ddd,8px 4px 0 #ddd,12px 4px 0 #ddd,16px 4px 0 #ddd,8px 8px 0 #ddd,12px 8px 0 #ddd,8px 12px 0 #ddd,12px 12px 0 #ddd,4px 16px 0 #ddd,8px 16px 0 #ddd,12px 16px 0 #ddd,16px 16px 0 #ddd,0px 20px 0 #ddd,4px 20px 0 #ddd,16px 20px 0 #ddd,20px 20px 0 #ddd; }
+.sprite-yt { width:4px; height:4px; position:relative; display:inline-block; }
+.sprite-yt::before { content:''; display:block; width:4px; height:4px; position:absolute; box-shadow:0px 0 0 #f00,4px 0 0 #f00,8px 0 0 #f00,12px 0 0 #f00,16px 0 0 #f00,20px 0 0 #f00,0px 4px 0 #f00,4px 4px 0 #f00,8px 4px 0 #fff,12px 4px 0 #fff,16px 4px 0 #f00,20px 4px 0 #f00,0px 8px 0 #f00,4px 8px 0 #f00,8px 8px 0 #fff,12px 8px 0 #fff,16px 8px 0 #fff,20px 8px 0 #f00,0px 12px 0 #f00,4px 12px 0 #f00,8px 12px 0 #fff,12px 12px 0 #fff,16px 12px 0 #f00,20px 12px 0 #f00,0px 16px 0 #f00,4px 16px 0 #f00,8px 16px 0 #f00,12px 16px 0 #f00,16px 16px 0 #f00,20px 16px 0 #f00; }
+.sprite-discord { width:4px; height:4px; position:relative; display:inline-block; }
+.sprite-discord::before { content:''; display:block; width:4px; height:4px; position:absolute; box-shadow:4px 0 0 #5865f2,8px 0 0 #5865f2,12px 0 0 #5865f2,16px 0 0 #5865f2,0px 4px 0 #5865f2,4px 4px 0 #7289da,8px 4px 0 #7289da,12px 4px 0 #7289da,16px 4px 0 #7289da,20px 4px 0 #5865f2,0px 8px 0 #5865f2,4px 8px 0 #000,8px 8px 0 #7289da,12px 8px 0 #7289da,16px 8px 0 #000,20px 8px 0 #5865f2,0px 12px 0 #5865f2,4px 12px 0 #7289da,8px 12px 0 #7289da,12px 12px 0 #7289da,16px 12px 0 #7289da,20px 12px 0 #5865f2,0px 16px 0 #5865f2,4px 16px 0 #5865f2,8px 16px 0 #7289da,12px 16px 0 #7289da,16px 16px 0 #5865f2,20px 16px 0 #5865f2,4px 20px 0 #5865f2,8px 20px 0 #5865f2,12px 20px 0 #5865f2,16px 20px 0 #5865f2; }
+
+@media (max-width:560px) {
+  .main-content { grid-template-columns:1fr; grid-template-rows:auto 1fr; }
+  .left-panel { border-right:none; border-bottom:4px solid #000; max-height:50dvh; }
+  .right-panel { flex:1; min-height:0; }
+  .tab { font-size:5px; padding:5px 2px; }
+}
+</style>
+</head>
+<body>
+<div id="cursor"></div>
+
+<!-- SCENE -->
+<div class="scene" id="scene">
+  <div id="stars-container"></div>
+  <div class="title-wrap" id="title-wrap">
+    <div class="title-deco">
+      <div class="title-deco-line"></div><div class="title-diamond"></div><div class="title-deco-line"></div>
+    </div>
+    <div class="main-title">DIGITAL KAMATA PEOPLE</div>
+    <div class="sub-title">デジタル蒲田民</div>
+    <button class="game-start-btn pf" id="game-start-btn">PRESS  START</button>
+  </div>
+  <div class="game-wrap" id="game-wrap" style="display:none;">
+    <canvas id="gameCanvas"></canvas>
+    <div class="game-ui">
+      <span id="game-score">SCORE: 0</span>
+      <span id="game-hi">HI: 0</span>
+    </div>
+    <div class="game-over-msg pf" id="game-over-msg"></div>
+  </div>
+  <div class="ground-bar"></div>
+</div>
+
+<!-- MAIN -->
+<div class="main-content">
+  <div class="left-panel">
+    <div class="panel-hdr">
+      <span class="blink-cur"></span>
+      <span class="pf" style="font-size:clamp(5px,0.9vw,8px);color:var(--cyan);text-shadow:1px 1px 0 #000;letter-spacing:2px;">MENU  SELECT</span>
+    </div>
+    <div class="buttons-area">
+      <button class="pxbtn" style="--bb:#011028;--bl:#0088dd;--bd:#003366;--bt:#00ccff;--bs:#336688" onclick="openPopup('community')">
+        <div class="btn-icon-wrap"><div style="position:relative;width:28px;height:28px;display:flex;align-items:center;justify-content:center;"><div class="sprite-lightning" style="transform:scale(1.1);"></div></div></div>
+        <div class="btn-texts"><span class="btn-name">コミュニティに参加する</span><span class="btn-eng">JOIN  COMMUNITY</span></div>
+        <span class="btn-arr">&#x25BA;</span>
+      </button>
+      <button class="pxbtn" style="--bb:#201000;--bl:#cc6600;--bd:#663300;--bt:#ff9900;--bs:#885522" onclick="openPopup('work')">
+        <div class="btn-icon-wrap"><div style="position:relative;width:28px;height:28px;display:flex;align-items:center;justify-content:center;"><div class="sprite-briefcase" style="transform:scale(1);"></div></div></div>
+        <div class="btn-texts"><span class="btn-name">仕事を依頼する</span><span class="btn-eng">REQUEST  PROJECT</span></div>
+        <span class="btn-arr">&#x25BA;</span>
+      </button>
+      <div class="skill-tags">
+        <span class="skill-tag">インタビュー取材</span>
+        <span class="skill-tag">動画編集</span>
+        <span class="skill-tag">イラスト作成</span>
+        <span class="skill-tag">子どもワークショップ</span>
+        <span class="skill-tag">平日ママさん協力隊</span>
+        <span class="skill-tag">グッズ制作</span>
+        <span class="skill-tag">デジタル蒲田民にアンケート</span>
+      </div>
+      <div class="partner-sep">- COMMUNITY  PARTNERS -</div>
+      <button class="pxbtn" style="--bb:#001508;--bl:#008833;--bd:#003311;--bt:#00dd44;--bs:#224433" onclick="openPopup('greenbird')">
+        <div class="btn-icon-wrap"><div style="position:relative;width:28px;height:28px;display:flex;align-items:center;justify-content:center;"><div class="sprite-leaf" style="transform:scale(1.0);"></div></div></div>
+        <div class="btn-texts"><span class="btn-name">greenbird 蒲田チーム</span><span class="btn-eng">CLEANUP  CREW</span></div>
+        <span class="btn-arr">&#x25BA;</span>
+      </button>
+      <button class="pxbtn" style="--bb:#100020;--bl:#9933cc;--bd:#440077;--bt:#cc88ff;--bs:#664488" onclick="openPopup('kamatanomi')">
+        <div class="btn-icon-wrap"><div style="position:relative;width:28px;height:28px;display:flex;align-items:center;justify-content:center;"><div class="sprite-building" style="transform:scale(0.9);"></div></div></div>
+        <div class="btn-texts"><span class="btn-name">カマタノミ</span><span class="btn-eng">LOCAL  MEDIA</span></div>
+        <span class="btn-arr">&#x25BA;</span>
+      </button>
+    </div>
+    <div class="sns-row">
+      <a class="sns-btn" href="https://www.instagram.com/kamatapeople/" target="_blank">
+        <div style="position:relative;width:20px;height:20px;"><div class="sprite-insta" style="transform:scale(0.8);position:absolute;top:2px;left:0;"></div></div>
+        <span class="sns-label">INSTA</span>
+      </a>
+      <a class="sns-btn" href="https://x.com/kamatapeople" target="_blank">
+        <div style="position:relative;width:20px;height:20px;"><div class="sprite-x" style="transform:scale(0.75);position:absolute;top:1px;left:0;"></div></div>
+        <span class="sns-label">X/TW</span>
+      </a>
+      <a class="sns-btn" href="https://www.youtube.com/@kamatapeople" target="_blank">
+        <div style="position:relative;width:20px;height:20px;"><div class="sprite-yt" style="transform:scale(0.75);position:absolute;top:1px;left:0;"></div></div>
+        <span class="sns-label">TUBE</span>
+      </a>
+      <a class="sns-btn" href="https://discord.gg/kzgBZQAdJ2" target="_blank">
+        <div style="position:relative;width:20px;height:20px;"><div class="sprite-discord" style="transform:scale(0.75);position:absolute;top:0;left:0;"></div></div>
+        <span class="sns-label">DISC</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="right-panel">
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('calendar',this)">
+        <div style="position:relative;width:16px;height:16px;flex-shrink:0;"><div class="sprite-calendar" style="transform:scale(0.65);position:absolute;top:0;left:0;"></div></div>
+        <span>イベント</span>
+      </button>
+      <button class="tab" onclick="switchTab('videos',this)">
+        <div style="position:relative;width:16px;height:16px;flex-shrink:0;"><div class="sprite-film" style="transform:scale(0.65);position:absolute;top:0;left:0;"></div></div>
+        <span>動画</span>
+      </button>
+    </div>
+    <div class="tab-content active" id="tab-calendar">
+      <div class="cal-wrap">
+        <iframe src="https://luma.com/embed/calendar/cal-51D8BrKion4WAJU/events" frameborder="0" style="border:1px solid #bfcbda88;border-radius:4px;" allowfullscreen="" aria-hidden="false" tabindex="0"></iframe>
+      </div>
+    </div>
+    <div class="tab-content" id="tab-videos">
+      <div class="videos-area">
+        <div class="vsec-title">
+          <div style="position:relative;width:16px;height:16px;flex-shrink:0;"><div class="sprite-play" style="transform:scale(0.7);position:absolute;top:1px;left:2px;"></div></div>
+          構想ディスカッション動画
+        </div>
+        <div class="video-grid">
+          <a class="video-thumb" href="https://youtu.be/8ZcxDbNyA3E" target="_blank">
+            <div class="thumb-img"><img src="https://img.youtube.com/vi/8ZcxDbNyA3E/mqdefault.jpg" alt="第一回"><div class="play-ov"><div class="play-icon-wrap"><div class="sprite-play" style="transform:scale(1.4);"></div></div></div></div>
+            <div class="thumb-title">第一回：NishikigoiNFT</div>
+          </a>
+          <a class="video-thumb" href="https://youtu.be/bUPAuvz94ZM" target="_blank">
+            <div class="thumb-img"><img src="https://img.youtube.com/vi/bUPAuvz94ZM/mqdefault.jpg" alt="第二回"><div class="play-ov"><div class="play-icon-wrap"><div class="sprite-play" style="transform:scale(1.4);"></div></div></div></div>
+            <div class="thumb-title">第二回：富山といえば寿司DAO</div>
+          </a>
+          <a class="video-thumb" href="https://youtu.be/GNM6VwTb9l4" target="_blank">
+            <div class="thumb-img"><img src="https://img.youtube.com/vi/GNM6VwTb9l4/mqdefault.jpg" alt="第三回"><div class="play-ov"><div class="play-icon-wrap"><div class="sprite-play" style="transform:scale(1.4);"></div></div></div></div>
+            <div class="thumb-title">第三回：おさかなだお長崎</div>
+          </a>
+          <a class="video-thumb" href="https://youtu.be/GNM6VwTb9l4" target="_blank">
+            <div class="thumb-img"><img src="https://img.youtube.com/vi/GNM6VwTb9l4/mqdefault.jpg" alt="第四回"><div class="play-ov"><div class="play-icon-wrap"><div class="sprite-play" style="transform:scale(1.4);"></div></div></div></div>
+            <div class="thumb-title">第四回：×カマタノミ</div>
+          </a>
+        </div>
+        <div class="vsec-title">
+          <div style="position:relative;width:16px;height:16px;flex-shrink:0;"><div class="sprite-yt" style="transform:scale(0.6);position:absolute;top:1px;left:0;"></div></div>
+          メディア出演
+        </div>
+        <a class="media-item" href="https://www.youtube.com/live/vUi7xDzs7aA?si=pf2ivm7-rRE5nG0N" target="_blank">
+          <div class="media-icon-wrap"><div style="position:relative;width:20px;height:16px;"><div class="sprite-yt" style="transform:scale(0.7);position:absolute;top:0;left:0;"></div></div></div>
+          <div class="media-text"><span class="media-title">weeklygmで活動紹介</span><span class="media-sub">YOUTUBE  LIVE</span></div>
+          <span class="media-arr">&#x25BA;</span>
+        </a>
+        <a class="media-item" href="https://voicy.jp/channel/4030/6915068" target="_blank">
+          <div class="media-icon-wrap"><div style="position:relative;width:20px;height:16px;display:flex;align-items:center;justify-content:center;"><div style="width:4px;height:4px;position:relative;"><div style="width:4px;height:4px;position:absolute;box-shadow:4px 0 0 #aaa,8px 0 0 #aaa,4px 4px 0 #888,8px 4px 0 #888,0 8px 0 #aaa,4px 8px 0 #888,8px 8px 0 #888,12px 8px 0 #aaa,0 12px 0 #aaa,4px 12px 0 #888,8px 12px 0 #888,12px 12px 0 #aaa,4px 16px 0 #aaa,8px 16px 0 #aaa,4px 20px 0 #aaa,0 20px 0 #aaa,8px 20px 0 #aaa,12px 20px 0 #aaa;transform:scale(0.8);"></div></div></div></div>
+          <div class="media-text"><span class="media-title">山古志ラジオ ─ 「好き」をテクノロジーで拡張する</span><span class="media-sub">VOICY  /  山古志RADIO</span></div>
+          <span class="media-arr">&#x25BA;</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="status-bar">
+  <span class="status-txt">&#x258C; KAMATA  ONLINE &#x258C;</span>
+  <div class="coin-row">
+    <div style="position:relative;width:20px;height:20px;"><div class="sprite-coin" style="transform:scale(0.8);position:absolute;top:1px;left:1px;"></div></div>
+    <span class="pf" style="font-size:clamp(4px,0.6vw,6px);">DIGITAL  KAMATA-MIN</span>
+  </div>
+</div>
+
+<!-- POPUP -->
+<div class="overlay" id="overlay" onclick="closeOnBg(event)">
+  <div class="popup" id="popup">
+    <div class="popup-hdr" id="popup-hdr">
+      <span class="popup-hdr-title" id="popup-hdr-title"></span>
+      <button class="popup-close-btn" onclick="closePopup()">X</button>
+    </div>
+    <div class="popup-body">
+      <div class="popup-sprite-area" id="popup-sprite-area"></div>
+      <div class="popup-name" id="popup-name"></div>
+      <div class="popup-eng" id="popup-eng"></div>
+      <div id="popup-badge"></div>
+      <div class="popup-desc" id="popup-desc"></div>
+      <a class="popup-cta" id="popup-cta" href="#" target="_blank">&#x25BA; GO</a>
+    </div>
+  </div>
+</div>
+
+<script>
+// DOM読み込み後に実行
+document.addEventListener('DOMContentLoaded', () => {
+  const startBtn = document.getElementById('game-start-btn');
+  if(startBtn) startBtn.addEventListener('click', startGame);
+});
+
+// カスタムカーソル
+const cur = document.getElementById('cursor');
+document.addEventListener('mousemove', e => { cur.style.left=e.clientX+'px'; cur.style.top=e.clientY+'px'; });
+
+// 星生成
+const sc = document.getElementById('stars-container');
+for(let i=0;i<32;i++){
+  const s=document.createElement('div');
+  s.className='star-px'+(Math.random()>.8?' gold':'')+(Math.random()>.92?' big':'');
+  s.style.left=Math.random()*100+'%'; s.style.top=Math.random()*78+'%';
+  s.style.animationDelay=Math.random()*2+'s'; sc.appendChild(s);
+}
+
+// ポップアップ
+const PD = {
+  community:{color:'#00ccff',hdrTitle:'JOIN  COMMUNITY',spriteClass:'sprite-lightning',spriteScale:2.2,name:'コミュニティに参加する',eng:'JOIN THE COMMUNITY',badge:null,desc:'蒲田を拠点に活動する「デジタル蒲田民」コミュニティ。\n\nイベント情報・地域ニュース・メンバーとの交流ができます。\n\nDiscordに参加して、蒲田をもっと楽しもう！',cta:'&#x25BA; Discordに参加する',href:'https://discord.gg/kzgBZQAdJ2'},
+  work:{color:'#ff9900',hdrTitle:'REQUEST  PROJECT',spriteClass:'sprite-briefcase',spriteScale:2.2,name:'仕事を依頼する',eng:'REQUEST A PROJECT',badge:null,desc:'イベント企画・運営、デジタルコンテンツ制作、地域プロジェクトのコーディネートなど、お気軽にご相談ください。\n\n蒲田エリアを中心に活動中。リモート対応も可能です。',cta:'&#x25BA; 依頼チャンネルへ',href:'https://discord.gg/numeZCsP5X'},
+  greenbird:{color:'#00dd44',hdrTitle:'COMMUNITY  PARTNER',spriteClass:'sprite-leaf',spriteScale:2.2,name:'greenbird 蒲田チーム',eng:'CLEANUP CREW',badge:'&#x2605; COMMUNITY PARTNER',desc:'greenbird（グリーンバード）は「街をきれいにしながら楽しもう」をコンセプトにした清掃ボランティア団体。\n\n蒲田チームは地域の清掃活動を定期開催。\n参加は誰でも大歓迎！',cta:'&#x25BA; 蒲田チームページへ',href:'https://www.greenbird.jp/team/kamata/'},
+  kamatanomi:{color:'#cc88ff',hdrTitle:'COMMUNITY  PARTNER',spriteClass:'sprite-building',spriteScale:2.0,name:'カマタノミ',eng:'LOCAL MEDIA',badge:'&#x2605; COMMUNITY PARTNER',desc:'蒲田エリアのローカル情報メディア「カマタノミ」。\n\n地域のお店・イベント・人を紹介するコンテンツを発信中。\n蒲田の魅力を一緒に発見しよう。',cta:'&#x25BA; カマタノミへ',href:'https://kamatanomi.com/'}
+};
+function openPopup(key){
+  const d=PD[key]; const popup=document.getElementById('popup');
+  popup.style.setProperty('--pc',d.color);
+  document.getElementById('popup-hdr').style.background=d.color;
+  document.getElementById('popup-hdr-title').textContent=d.hdrTitle;
+  document.getElementById('popup-sprite-area').innerHTML=`<div style="position:relative;width:${Math.round(28*d.spriteScale)}px;height:${Math.round(28*d.spriteScale)}px;"><div class="${d.spriteClass}" style="transform:scale(${d.spriteScale});position:absolute;top:0;left:0;transform-origin:top left;"></div></div>`;
+  document.getElementById('popup-name').style.color=d.color;
+  document.getElementById('popup-name').textContent=d.name;
+  document.getElementById('popup-eng').textContent=d.eng;
+  document.getElementById('popup-badge').innerHTML=d.badge?`<div class="popup-badge" style="border-color:${d.color};color:${d.color};">${d.badge}</div>`:'';
+  document.getElementById('popup-desc').innerHTML=d.desc.replace(/\n/g,'<br>');
+  const cta=document.getElementById('popup-cta'); cta.innerHTML=d.cta; cta.href=d.href; cta.style.background=d.color;
+  document.getElementById('overlay').classList.add('active');
+}
+function closePopup(){ document.getElementById('overlay').classList.remove('active'); }
+function closeOnBg(e){ if(e.target===document.getElementById('overlay')) closePopup(); }
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') closePopup(); });
+function switchTab(name,el){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('tab-'+name).classList.add('active');
+}
+
+// =============================================
+// KAMATA TRASH CATCH GAME
+// 恐竜ゲーム風：右から転がってくるゴミを
+// greenbird袋キャラでジャンプしてキャッチ/回避
+// スペース/タップ → ジャンプ
+// よいゴミ(緑)→キャッチで+点、悪いゴミ(赤)→当たるとミス
+// =============================================
+let gameRAF = null;
+let hiScore = 0;
+
+function startGame() {
+  document.getElementById('title-wrap').style.display = 'none';
+  document.getElementById('game-wrap').style.display = 'block';
+  initGame();
+}
+function initGame() {
+  const canvas = document.getElementById('gameCanvas');
+  const scene  = document.getElementById('scene');
+  canvas.width  = scene.offsetWidth;
+  canvas.height = scene.offsetHeight - 16;
+  if (gameRAF) cancelAnimationFrame(gameRAF);
+  runGame(canvas);
+}
+
+function runGame(canvas) {
+  const ctx = canvas.getContext('2d');
+  ctx.imageSmoothingEnabled = false;
+  const W = canvas.width, H = canvas.height;
+  // 1ドット=2px固定で細かいピクセルアート
+  const PX = 2;
+  const GROUND = H - PX * 4;
+
+  // =============================================
+  // 高精細ピクセルスプライト
+  // キャラ: 16×22ドット、ゴミ: 10〜14ドット幅
+  // =============================================
+  function rect(x,y,w,h,c){ ctx.fillStyle=c; ctx.fillRect(Math.floor(x),Math.floor(y),w,h); }
+
+  // ドット配列描画ユーティリティ
+  function dd(ox,oy,dots){
+    dots.forEach(([dx,dy,c])=>{ ctx.fillStyle=c; ctx.fillRect(ox+dx*PX,oy+dy*PX,PX,PX); });
+  }
+
+  // ---- greenbird ゴミ袋マスコット (16×22ドット) ----
+  // ---- ゴジラ風キャラ (16×24ドット) ----
+  // 緑の怪獣が街をのし歩きゴミをキャッチする
+  // ---- ゴジラ (シンプル版 14×20ドット) ----
+  // 黒輪郭ベースで読みやすく
+  // ---- ズーキーパー風キャラ (12×18ドット) ----
+  // 帽子・顔・制服・トングを持つシンプルな人間キャラ
+  function drawBag(ox, oy, fr, flash) {
+    const K  = '#000000';               // 輪郭
+    const SK = flash?'#ffddcc':'#ffccaa'; // 肌
+    const SKD= flash?'#ffbbaa':'#dd9977'; // 肌影
+    const HT = '#226600';               // 帽子(緑)
+    const HTL= '#44aa22';               // 帽子ハイライト
+    const SH = '#ffffff';               // シャツ白
+    const SHD= '#ccddff';               // シャツ影
+    const PT = '#334488';               // ズボン紺
+    const PTD= '#223366';               // ズボン影
+    const SH2= '#ddaa44';               // 靴茶
+    const TG = '#bbbbbb';               // トング銀
+    const TGL= '#eeeeee';               // トング光
+    const TGH= '#dd9900';               // トングハンドル
+    const HA = '#553311';               // 髪
+
+    // --- 帽子 ---
+    dd(ox,oy,[
+      // つば
+      [0,2,K],[1,2,HT],[2,2,HT],[3,2,HT],[4,2,HT],[5,2,HT],[6,2,HT],[7,2,HT],[8,2,HT],[9,2,K],
+      [0,3,K],[1,3,HTL],[2,3,HTL],[3,3,HTL],[4,3,HTL],[5,3,HTL],[6,3,HT],[7,3,HT],[8,3,HT],[9,3,K],
+      // クラウン
+      [2,0,K],[3,0,K],[4,0,K],[5,0,K],[6,0,K],[7,0,K],
+      [1,1,K],[2,1,HT],[3,1,HTL],[4,1,HTL],[5,1,HTL],[6,1,HT],[7,1,HT],[8,1,K],
+      [1,2,K],[2,2,HT],[3,2,HTL],[4,2,HTL],[5,2,HTL],[6,2,HT],[7,2,HT],[8,2,HT],[9,2,K],
+      // バッジ（黄）
+      [5,1,'#ffdd00'],[6,1,'#ffdd00'],
+    ]);
+
+    // --- 顔 ---
+    dd(ox,oy,[
+      [2,4,K],[3,4,SK],[4,4,SK],[5,4,SK],[6,4,SK],[7,4,SK],[8,4,K],
+      [1,5,K],[2,5,SK],[3,5,SK],[4,5,SK],[5,5,SK],[6,5,SK],[7,5,SK],[8,5,SK],[9,5,K],
+      [1,6,K],[2,6,SK],[3,6,SK],[4,6,SK],[5,6,SK],[6,6,SK],[7,6,SK],[8,6,SK],[9,6,K],
+      [1,7,K],[2,7,SK],[3,7,SK],[4,7,SK],[5,7,SK],[6,7,SK],[7,7,SK],[8,7,SK],[9,7,K],
+      [2,8,K],[3,8,SK],[4,8,SK],[5,8,SK],[6,8,SK],[7,8,SK],[8,8,K],
+      // 髪(帽子からはみ出る)
+      [1,4,HA],[2,4,HA],[9,4,HA],
+      // 目（黒目＋白目）
+      [3,5,K],[4,5,'#ffffff'],[5,5,K],[6,5,K],[7,5,'#ffffff'],[8,5,K],
+      [4,6,K],[5,6,K],[7,6,K],[8,6,K],
+      // 目ハイライト
+      [3,5,'#ccffcc'],[6,5,'#ccffcc'],
+      // 口（笑顔）
+      [3,7,K],[4,7,'#dd4444'],[5,7,'#ffaaaa'],[6,7,'#dd4444'],[7,7,K],
+      [4,8,K],[5,8,K],[6,8,K],
+    ]);
+
+    // --- 体（制服） ---
+    dd(ox,oy,[
+      // 首
+      [4,9,SK],[5,9,SK],[6,9,SK],
+      [3,9,K],[7,9,K],
+      // 胴体
+      [2,10,K],[3,10,SH],[4,10,SH],[5,10,SH],[6,10,SH],[7,10,SH],[8,10,K],
+      [2,11,K],[3,11,SH],[4,11,SHD],[5,11,SH],[6,11,SH],[7,11,SHD],[8,11,K],
+      [2,12,K],[3,12,SH],[4,12,SHD],[5,12,SH],[6,12,SH],[7,12,SHD],[8,12,K],
+      // ズボン
+      [2,13,K],[3,13,PT],[4,13,PT],[5,13,PT],[6,13,PT],[7,13,PT],[8,13,K],
+      [2,14,K],[3,14,PT],[4,14,PTD],[5,14,K],[6,14,PTD],[7,14,PT],[8,14,K],
+    ]);
+
+    // --- 腕（揺れアニメ）---
+    const ao = fr===1 ? -1 : fr===2 ? 1 : 0;
+
+    // 左腕
+    dd(ox,oy,[
+      [1,10+ao,K],[2,10+ao,SK],[1,11+ao,K],[2,11+ao,SK],
+      [1,12+ao,K],[2,12+ao,SKD],[1,13+ao,K],
+    ]);
+
+    // 右腕＋トング
+    dd(ox,oy,[
+      [8,10-ao,SK],[9,10-ao,K],
+      [8,11-ao,SK],[9,11-ao,K],
+      [8,12-ao,SKD],[9,12-ao,K],
+      // トングハンドル（黄色グリップ）
+      [9,10-ao,TGH],[10,10-ao,TGH],[9,11-ao,TGH],
+      // トング軸
+      [10,11-ao,TG],[11,11-ao,TGL],[12,11-ao,TG],
+      [10,12-ao,TG],[11,12-ao,TGL],[12,12-ao,TG],
+      // 先端 V字
+      [10,13-ao,TG],[11,13-ao,K],[13,13-ao,TG],
+      [9,13-ao,TGL],[9,14-ao,TGL],   // 上の爪
+      [13,14-ao,TGL],[14,14-ao,TG],  // 下の爪
+      // 輪郭
+      [9,10-ao,K],[9,14-ao,K],[14,14-ao,K],
+    ]);
+
+    // --- 足（3フレームアニメ）---
+    if(fr===0){
+      // 直立
+      dd(ox,oy,[
+        [3,15,K],[4,15,PT],[5,15,K],[6,15,PT],[7,15,K],
+        [3,16,K],[4,16,PTD],[5,16,K],[6,16,PTD],[7,16,K],
+        [3,17,K],[4,17,SH2],[5,17,K],[6,17,SH2],[7,17,K],
+        [3,18,K],[4,18,SH2],[5,18,K],[6,18,SH2],[7,18,K],
+      ]);
+    } else if(fr===1){
+      // 左足前
+      dd(ox,oy,[
+        [2,15,K],[3,15,PT],[4,15,K],[6,15,PT],[7,15,K],
+        [2,16,K],[3,16,PTD],[4,16,K],[6,16,PTD],[7,16,K],
+        [2,17,K],[3,17,SH2],[4,17,SH2],[5,17,K],[6,17,PTD],[7,17,K],
+        [2,18,K],[3,18,SH2],[4,18,K],[7,18,SH2],[8,18,K],
+      ]);
+    } else {
+      // 右足前
+      dd(ox,oy,[
+        [3,15,K],[4,15,PT],[5,15,K],[7,15,PT],[8,15,K],
+        [3,16,K],[4,16,PTD],[5,16,K],[7,16,PTD],[8,16,K],
+        [3,17,K],[4,17,PTD],[5,17,K],[6,17,SH2],[7,17,SH2],[8,17,K],
+        [3,18,K],[4,18,SH2],[5,18,K],[6,18,K],[7,18,SH2],[8,18,K],
+      ]);
+    }
+  }
+
+
+  // ---- ゴミスプライト (ドット単位) ----
+
+  // ペットボトル (10×16ドット) — 目と口付きでかわいく
+  function drawBottle(ox,oy){
+    dd(ox,oy,[
+      // キャップ(赤)
+      [3,0,'#cc3300'],[4,0,'#ee4400'],[5,0,'#ee4400'],[6,0,'#cc3300'],
+      [2,1,'#dd4400'],[3,1,'#ff6622'],[4,1,'#ffaa66'],[5,1,'#ffaa66'],[6,1,'#ff6622'],[7,1,'#dd4400'],
+      [2,2,'#bb2200'],[3,2,'#cc3300'],[4,2,'#dd4400'],[5,2,'#dd4400'],[6,2,'#cc3300'],[7,2,'#bb2200'],
+      // 首
+      [3,3,'#88ccee'],[4,3,'#bbddff'],[5,3,'#bbddff'],[6,3,'#88ccee'],
+      [3,4,'#77bbdd'],[4,4,'#99ccff'],[5,4,'#99ccff'],[6,4,'#77bbdd'],
+      // 肩
+      [2,5,'#66aacc'],[3,5,'#88bbdd'],[4,5,'#aaccff'],[5,5,'#aaccff'],[6,5,'#88bbdd'],[7,5,'#66aacc'],
+      // 胴(水色)
+      [1,6,'#55aacc'],[2,6,'#77bbdd'],[3,6,'#99ccff'],[4,6,'#ccddff'],[5,6,'#ccddff'],[6,6,'#99ccff'],[7,6,'#77bbdd'],[8,6,'#55aacc'],
+      [1,7,'#55aacc'],[2,7,'#77bbdd'],[3,7,'#99ccff'],[4,7,'#eef8ff'],[5,7,'#eef8ff'],[6,7,'#99ccff'],[7,7,'#77bbdd'],[8,7,'#55aacc'],
+      // 目
+      [3,7,'#223344'],[4,7,'#ffffff'],[5,7,'#223344'],
+      [4,8,'#001122'],
+      // 口
+      [3,9,'#77aacc'],[4,9,'#4488aa'],[5,9,'#4488aa'],[6,9,'#77aacc'],
+      [1,9,'#55aacc'],[2,9,'#77bbdd'],[7,9,'#77bbdd'],[8,9,'#55aacc'],
+      [1,10,'#55aacc'],[2,10,'#77bbdd'],[3,10,'#99ccff'],[4,10,'#ccddff'],[5,10,'#ccddff'],[6,10,'#99ccff'],[7,10,'#77bbdd'],[8,10,'#55aacc'],
+      [1,11,'#55aacc'],[2,11,'#77bbdd'],[3,11,'#88bbdd'],[4,11,'#aaccee'],[5,11,'#aaccee'],[6,11,'#88bbdd'],[7,11,'#77bbdd'],[8,11,'#55aacc'],
+      // 底
+      [2,12,'#447799'],[3,12,'#6699bb'],[4,12,'#88aacc'],[5,12,'#88aacc'],[6,12,'#6699bb'],[7,12,'#447799'],
+      [3,13,'#336688'],[4,13,'#446699'],[5,13,'#446699'],[6,13,'#336688'],
+    ]);
+  }
+
+  // 缶 (10×14ドット) — 赤缶かわいい
+  function drawCan(ox,oy){
+    dd(ox,oy,[
+      // フタ
+      [2,0,'#aaaaaa'],[3,0,'#cccccc'],[4,0,'#dddddd'],[5,0,'#dddddd'],[6,0,'#cccccc'],[7,0,'#aaaaaa'],
+      [1,1,'#999999'],[2,1,'#bbbbbb'],[3,1,'#cccccc'],[4,1,'#dddddd'],[5,1,'#dddddd'],[6,1,'#cccccc'],[7,1,'#bbbbbb'],[8,1,'#999999'],
+      // 胴上部
+      [1,2,'#cc1100'],[2,2,'#ee2200'],[3,2,'#ff4422'],[4,2,'#ff7755'],[5,2,'#ff7755'],[6,2,'#ff4422'],[7,2,'#ee2200'],[8,2,'#cc1100'],
+      [0,3,'#bb0000'],[1,3,'#dd2200'],[2,3,'#ff3300'],[3,3,'#ff5533'],[4,3,'#ff8866'],[5,3,'#ff8866'],[6,3,'#ff5533'],[7,3,'#ff3300'],[8,3,'#dd2200'],[9,3,'#bb0000'],
+      [0,4,'#bb0000'],[1,4,'#dd2200'],[2,4,'#ff3300'],[3,4,'#ff5533'],[4,4,'#ffffff'],[5,4,'#ffffff'],[6,4,'#ff5533'],[7,4,'#ff3300'],[8,4,'#dd2200'],[9,4,'#bb0000'],
+      // 目
+      [2,4,'#ff3300'],[3,4,'#222222'],[4,4,'#ffffff'],[5,4,'#ffffff'],[6,4,'#222222'],[7,4,'#ff3300'],
+      [3,5,'#000000'],[6,5,'#000000'],[4,5,'#ffffff'],[5,5,'#ffffff'],
+      // ほっぺ
+      [2,5,'#ff8866'],[7,5,'#ff8866'],
+      // 口
+      [3,6,'#ff3300'],[4,6,'#ff9966'],[5,6,'#ff9966'],[6,6,'#ff3300'],
+      [0,6,'#bb0000'],[1,6,'#dd2200'],[2,6,'#ff3300'],[7,6,'#ff3300'],[8,6,'#dd2200'],[9,6,'#bb0000'],
+      [0,7,'#bb0000'],[1,7,'#dd2200'],[2,7,'#ff3300'],[3,7,'#ff5533'],[4,7,'#ff7755'],[5,7,'#ff7755'],[6,7,'#ff5533'],[7,7,'#ff3300'],[8,7,'#dd2200'],[9,7,'#bb0000'],
+      [0,8,'#aa0000'],[1,8,'#cc1100'],[2,8,'#dd3300'],[3,8,'#ee4422'],[4,8,'#ff6644'],[5,8,'#ff6644'],[6,8,'#ee4422'],[7,8,'#dd3300'],[8,8,'#cc1100'],[9,8,'#aa0000'],
+      [0,9,'#990000'],[1,9,'#bb1100'],[2,9,'#cc2200'],[3,9,'#dd3300'],[4,9,'#ee5533'],[5,9,'#ee5533'],[6,9,'#dd3300'],[7,9,'#cc2200'],[8,9,'#bb1100'],[9,9,'#990000'],
+      // 底
+      [1,10,'#881100'],[2,10,'#aa2200'],[3,10,'#bb3311'],[4,10,'#cc4422'],[5,10,'#cc4422'],[6,10,'#bb3311'],[7,10,'#aa2200'],[8,10,'#881100'],
+      [2,11,'#772200'],[3,11,'#883300'],[4,11,'#994422'],[5,11,'#994422'],[6,11,'#883300'],[7,11,'#772200'],
+      [3,12,'#663300'],[4,12,'#773311'],[5,12,'#773311'],[6,12,'#663300'],
+    ]);
+  }
+
+  // 紙くず (12×10ドット) — しわしわ感
+  function drawPaper(ox,oy){
+    dd(ox,oy,[
+      [0,0,'#eeeebb'],[1,0,'#ffffcc'],[2,0,'#eeeebb'],[3,0,'#ddddaa'],[4,0,'#ffffcc'],[5,0,'#eeeebb'],[6,0,'#ddddaa'],[7,0,'#ffffcc'],[8,0,'#eeeebb'],
+      [0,1,'#ddddaa'],[1,1,'#cccc99'],[2,1,'#eeeebb'],[3,1,'#ffffcc'],[4,1,'#eeeebb'],[5,1,'#ddddaa'],[6,1,'#ffffcc'],[7,1,'#eeeebb'],[8,1,'#cccc99'],
+      [0,2,'#eeeebb'],[1,2,'#ffffcc'],[2,2,'#ffffff'],[3,2,'#ffffff'],[4,2,'#ffffcc'],[5,2,'#eeeebb'],[6,2,'#ddddaa'],[7,2,'#ffffcc'],[8,2,'#eeeebb'],
+      [0,3,'#cccc99'],[1,3,'#ddddaa'],[2,3,'#eeeebb'],[3,3,'#ffffcc'],[4,3,'#eeeebb'],[5,3,'#cccc99'],[6,3,'#eeeebb'],[7,3,'#ddddaa'],[8,3,'#ffffcc'],
+      [0,4,'#eeeebb'],[1,4,'#ffffcc'],[2,4,'#ddddaa'],[3,4,'#eeeebb'],[4,4,'#ffffcc'],[5,4,'#eeeebb'],[6,4,'#ddddaa'],[7,4,'#eeeebb'],[8,4,'#cccc99'],
+      [0,5,'#ddddaa'],[1,5,'#cccc99'],[2,5,'#eeeebb'],[3,5,'#ddddaa'],[4,5,'#cccc99'],[5,5,'#ddddaa'],[6,5,'#eeeebb'],[7,5,'#ffffcc'],[8,5,'#eeeebb'],
+      [1,6,'#bbbb88'],[2,6,'#cccc99'],[3,6,'#bbbb88'],[4,6,'#ddddaa'],[5,6,'#cccc99'],[6,6,'#bbbb88'],[7,6,'#cccc99'],
+      [2,7,'#aaa877'],[3,7,'#bbbb88'],[4,7,'#aaa877'],[5,7,'#bbbb88'],[6,7,'#aaa877'],
+    ]);
+  }
+
+  // タバコ（悪いゴミ: BADマーク付き）(12×8ドット)
+  function drawCig(ox,oy){
+    dd(ox,oy,[
+      // BAD三角
+      [4,-3,'#ff0000'],[5,-3,'#ff0000'],[6,-3,'#ff0000'],
+      [3,-2,'#ff0000'],[4,-2,'#ffff00'],[5,-2,'#ff4400'],[6,-2,'#ffff00'],[7,-2,'#ff0000'],
+      [3,-1,'#ff0000'],[4,-1,'#ff0000'],[5,-1,'#ff8800'],[6,-1,'#ff0000'],[7,-1,'#ff0000'],
+      // 煙
+      [8,0,'#aaaaaa'],[8,1,'#888888'],[9,0,'#999999'],
+      [7,0,'#ffcc00'],[7,1,'#ff8800'],
+      // 本体
+      [0,1,'#f5e6c8'],[1,1,'#fff0d0'],[2,1,'#fff0d0'],[3,1,'#fff0d0'],[4,1,'#fff0d0'],[5,1,'#fff0d0'],[6,1,'#f5e6c8'],
+      [0,2,'#eeddbb'],[1,2,'#eeeecc'],[2,2,'#ffffff'],[3,2,'#ffffff'],[4,2,'#ffffff'],[5,2,'#eeeecc'],[6,2,'#eeddbb'],
+      [0,3,'#ddd0aa'],[1,3,'#eeeecc'],[2,3,'#ffffff'],[3,3,'#ffffff'],[4,3,'#ffffff'],[5,3,'#eeeecc'],[6,3,'#ddd0aa'],
+      [0,4,'#ccbb99'],[1,4,'#ddd0aa'],[2,4,'#eeddbb'],[3,4,'#eeddbb'],[4,4,'#eeddbb'],[5,4,'#ddd0aa'],[6,4,'#ccbb99'],
+      // フィルター部
+      [0,2,'#ee8866'],[0,3,'#dd6644'],[0,4,'#cc5533'],
+      [0,1,'#ee8866'],
+    ]);
+  }
+
+  // ポイ捨て缶（つぶれた）(12×7ドット) — BADマーク付き
+  function drawBadCan(ox,oy){
+    dd(ox,oy,[
+      // BAD
+      [4,-3,'#ff0000'],[5,-3,'#ff0000'],[6,-3,'#ff0000'],
+      [3,-2,'#ff0000'],[4,-2,'#ffff00'],[5,-2,'#ff4400'],[6,-2,'#ffff00'],[7,-2,'#ff0000'],
+      [3,-1,'#ff0000'],[4,-1,'#ff0000'],[5,-1,'#ff8800'],[6,-1,'#ff0000'],[7,-1,'#ff0000'],
+      // 潰れた缶
+      [0,0,'#884400'],[1,0,'#aa5500'],[2,0,'#cc7700'],[3,0,'#dd8800'],[4,0,'#cc7700'],[5,0,'#aa5500'],[6,0,'#884400'],
+      [0,1,'#773300'],[1,1,'#995500'],[2,1,'#bb7733'],[3,1,'#ffaa55'],[4,1,'#ffdd99'],[5,1,'#ffaa55'],[6,1,'#bb7733'],[7,1,'#995500'],[8,1,'#773300'],
+      [0,2,'#662200'],[1,2,'#884400'],[2,2,'#aa6633'],[3,2,'#cc8844'],[4,2,'#eebb77'],[5,2,'#ddaa66'],[6,2,'#cc8844'],[7,2,'#aa6633'],[8,2,'#884400'],[9,2,'#662200'],
+      [1,3,'#553300'],[2,3,'#774422'],[3,3,'#996633'],[4,3,'#bb8844'],[5,3,'#cc9955'],[6,3,'#bb8844'],[7,3,'#996633'],[8,3,'#774422'],[9,3,'#553300'],
+      [2,4,'#442200'],[3,4,'#664433'],[4,4,'#886644'],[5,4,'#997755'],[6,4,'#886644'],[7,4,'#664433'],[8,4,'#442200'],
+      [3,5,'#332211'],[4,5,'#554433'],[5,5,'#665544'],[6,5,'#554433'],[7,5,'#332211'],
+    ]);
+  }
+
+  const TRASH_TYPES = [
+    { id:'bottle', good:true,  pts:10, w:10, h:14, draw:drawBottle },
+    { id:'can',    good:true,  pts:10, w:10, h:13, draw:drawCan    },
+    { id:'paper',  good:true,  pts:5,  w:9,  h:8,  draw:drawPaper  },
+    { id:'cig',    good:false, pts:0,  w:10, h:8,  draw:drawCig    },
+    { id:'badcan', good:false, pts:0,  w:10, h:6,  draw:drawBadCan },
+  ];
+
+  // ---- 建物背景 ----
+
+  // ---- 地面タイル ----
+  function drawGround(sc) {
+    // アスファルト（明るいグレー）
+    ctx.fillStyle = '#888899';
+    ctx.fillRect(0, GROUND, W, H-GROUND);
+    // 路面の線
+    ctx.fillStyle = '#9999aa';
+    ctx.fillRect(0, GROUND, W, PX);
+    // タイル線
+    ctx.fillStyle = 'rgba(255,255,255,0.15)';
+    for(let tx=(sc%(PX*10)); tx<W; tx+=PX*10)
+      ctx.fillRect(tx, GROUND+PX, PX, H-GROUND-PX);
+    // 草エリア
+    ctx.fillStyle = '#55aa44';
+    ctx.fillRect(0, GROUND+PX*2, W, PX);
+  }
+
+  // =============================================
+  // ゲーム状態
+  // タイムアタック制：30秒間で出現したgoodゴミの
+  // 80%以上をキャッチ → 参加資格ゲット！
+  // badゴミに当たると一時的にフラッシュ＆速度ダウン
+  // =============================================
+  const CHAR_X   = PX * 8;
+  const CHAR_W   = PX * 16;
+  const CHAR_H   = PX * 22;
+  const GROUND_Y = GROUND - CHAR_H;
+  const TIME_LIMIT = 30; // 秒
+
+  let charY     = GROUND_Y;
+  let vy = 0, jumping = false;
+  let frame = 0, speed = 3.2;
+  let gameActive = true, flash = 0;
+  let legF = 0, scroll = 0;
+  let trash = [], particles = [], floatTexts = [];
+  let nextSpawn = 60;
+
+  // スコア集計
+  let goodSpawned  = 0;  // 出現したgoodゴミ総数
+  let goodCaught   = 0;  // キャッチしたgoodゴミ数
+  let badHit       = 0;  // 踏んだbadゴミ数
+  let timeLeft     = TIME_LIMIT;
+
+  // UI更新
+  const scoreEl = document.getElementById('game-score');
+  const hiEl    = document.getElementById('game-hi');
+  document.getElementById('game-over-msg').style.display = 'none';
+  scoreEl.textContent = `${goodCaught}/${goodSpawned}`;
+  hiEl.textContent    = `TIME: ${timeLeft}`;
+
+  // タイマー
+  const timerID = setInterval(()=>{
+    if(!gameActive) return;
+    timeLeft--;
+    hiEl.textContent = `TIME: ${timeLeft}`;
+    if(timeLeft <= 0){ clearInterval(timerID); endGame(); }
+  }, 1000);
+
+  // ---- ジャンプ ----
+  function jump(){ if(!jumping && gameActive){ jumping=true; vy=-PX*8.5; } }
+
+  // ---- 入力 ----
+  const onKey = e=>{
+    if(e.code==='Space'||e.code==='ArrowUp'){ e.preventDefault(); gameActive?jump():retry(); }
+  };
+  const onPtr = e=>{ gameActive?jump():retry(); };
+  document.addEventListener('keydown', onKey);
+  canvas.addEventListener('pointerdown', onPtr);
+
+  // ---- パーティクル ----
+  function burst(x,y,good){
+    const cols = good ? ['#00ff88','#ffff44','#00ddff','#ffffff'] : ['#ff4444','#ff8800','#ffff00'];
+    for(let i=0;i<10;i++) particles.push({
+      x, y, vx:(Math.random()-0.5)*5, vy:-Math.random()*5-1,
+      life:22, col:cols[i%cols.length], sz: good?PX:PX*0.8
+    });
+  }
+
+  // フローティングテキスト（+10 など）
+  function floatText(x,y,txt,col){
+    floatTexts.push({ x, y, txt, col, life:30, vy:-1.2 });
+  }
+
+  // ---- 終了処理 ----
+  function endGame(){
+    gameActive = false;
+    clearInterval(timerID);
+    if(goodSpawned===0) goodSpawned=1; // 0除算防止
+    const rate    = goodCaught / goodSpawned;
+    const cleared = rate >= 0.8;
+    if(goodCaught > hiScore) hiScore = goodCaught;
+    hiEl.textContent = `HI: ${hiScore}`;
+
+    setTimeout(()=>{
+      const m = document.getElementById('game-over-msg');
+      if(cleared){
+        m.style.borderColor = '#00ff88';
+        m.style.color       = '#00ff88';
+        m.innerHTML =
+          `<span style="font-size:1.3em;">★ CLEARED! ★</span><br>` +
+          `${goodCaught} / ${goodSpawned} ゴミを回収！<br>` +
+          `<span style="color:#ffd700;">デジタル蒲田民の<br>参加資格を手に入れた！</span><br>` +
+          
+          `<span style="font-size:0.65em;color:#88aaff;">SPACE / TAP TO RETRY</span>`;
+      } else {
+        const pct = Math.round(rate*100);
+        m.style.borderColor = '#ffd700';
+        m.style.color       = '#ffd700';
+        m.innerHTML =
+          `RESULT: ${pct}%<br>` +
+          `${goodCaught} / ${goodSpawned} ゴミを回収<br>` +
+          `<span style="color:#ff8888;">80%以上で参加資格ゲット！</span><br>` +
+          `<span style="color:#aaaaff;">あと ${goodSpawned-goodCaught} 個でクリア</span><br>` +
+          `<span style="font-size:0.7em;color:#888;">SPACE / TAP TO RETRY</span>`;
+      }
+      m.style.display = 'block';
+    }, 500);
+  }
+
+  function retry(){
+    clearInterval(timerID);
+    document.removeEventListener('keydown', onKey);
+    canvas.removeEventListener('pointerdown', onPtr);
+    if(gameRAF) cancelAnimationFrame(gameRAF);
+    runGame(canvas);
+  }
+
+  // ---- メインループ ----
+  function tick(){
+    gameRAF = requestAnimationFrame(tick);
+    frame++; scroll += speed;
+    ctx.clearRect(0,0,W,H);
+
+    // 背景なし（空のみ）
+    drawGround(scroll);
+
+    if(gameActive){
+      // 物理
+      if(jumping){ charY+=vy; vy+=PX*0.55; if(charY>=GROUND_Y){charY=GROUND_Y;jumping=false;vy=0;} }
+      legF = jumping ? 0 : (Math.floor(frame/7)%3);
+
+      // スポーン（good:bad = 3:1 比率）
+      if(frame >= nextSpawn){
+        const isGood = Math.random() < 0.72;
+        const pool   = TRASH_TYPES.filter(t=>t.good===isGood);
+        const def    = pool[Math.floor(Math.random()*pool.length)];
+        // goodは地面 or ジャンプ高さ、badは地面のみ
+        const onGnd  = !def.good || Math.random() > 0.4;
+        const ty     = onGnd
+          ? GROUND - def.h*PX
+          : GROUND - def.h*PX - CHAR_H*(0.55+Math.random()*0.45);
+        trash.push({ def, x:W+20, y:ty, spin:0, counted:false });
+        if(def.good){ goodSpawned++; scoreEl.textContent=`${goodCaught}/${goodSpawned}`; }
+        const gap = Math.max(48, 110 - Math.floor(frame/300)*6);
+        nextSpawn = frame + gap + Math.random()*35;
+      }
+
+      // ゴミ移動＋衝突
+      trash.forEach(t=>{
+        t.x -= speed;
+        t.spin += def_spin(t.def.good);
+        const tw=t.def.w*PX, th=t.def.h*PX;
+        const pad=PX*2;
+        if(!t.counted &&
+           t.x+tw-pad > CHAR_X+pad &&
+           t.x+pad    < CHAR_X+CHAR_W-pad &&
+           t.y+th-pad > charY+CHAR_H*0.25 &&
+           t.y+pad    < charY+CHAR_H-pad){
+          t.counted = true;
+          if(t.def.good){
+            goodCaught++;
+            burst(t.x+tw/2, t.y, true);
+            floatText(t.x+tw/2, t.y-PX*4, `+${t.def.pts}`, '#00ff88');
+            scoreEl.textContent=`${goodCaught}/${goodSpawned}`;
+          } else {
+            badHit++;
+            flash = 28;
+            burst(CHAR_X+CHAR_W/2, charY+CHAR_H*0.5, false);
+            floatText(CHAR_X+CHAR_W/2, charY-PX*4, 'BAD!', '#ff4444');
+            speed = Math.max(2, speed - 0.5); // 一時的にスピードダウン
+          }
+        }
+      });
+      trash = trash.filter(t=> t.x + t.def.w*PX > -30 && !t.counted);
+
+      // 速度は時間経過でゆるやかに上昇
+      speed = 3.2 + (TIME_LIMIT - timeLeft) * 0.08;
+    }
+
+    // ゴミ描画
+    trash.forEach(t=>{
+      ctx.save();
+      const tw=t.def.w*PX, th=t.def.h*PX;
+      ctx.translate(t.x+tw/2, t.y+th/2);
+      ctx.rotate(t.spin);
+      ctx.translate(-tw/2, -th/2);
+      t.def.draw(0, 0);
+      ctx.restore();
+    });
+
+    // パーティクル
+    particles = particles.filter(p=>p.life>0);
+    particles.forEach(p=>{
+      p.x+=p.vx; p.y+=p.vy; p.vy+=0.2; p.life--;
+      ctx.globalAlpha = p.life/22;
+      ctx.fillStyle   = p.col;
+      ctx.fillRect(p.x, p.y, p.sz||PX, p.sz||PX);
+    });
+    ctx.globalAlpha = 1;
+
+    // フローティングテキスト
+    floatTexts = floatTexts.filter(f=>f.life>0);
+    floatTexts.forEach(f=>{
+      f.y += f.vy; f.life--;
+      ctx.globalAlpha = f.life/30;
+      ctx.fillStyle   = f.col;
+      ctx.font        = `bold ${PX*5}px 'Press Start 2P',monospace`;
+      ctx.fillText(f.txt, f.x - PX*5, f.y);
+    });
+    ctx.globalAlpha = 1;
+
+    // キャラ描画
+    if(flash>0) flash--;
+    drawBag(CHAR_X, charY, gameActive?legF:0, flash>0&&Math.floor(flash/3)%2===0);
+
+    // ---- HUD ----
+    // 進捗バー（画面上部）
+    const rate   = goodSpawned > 0 ? goodCaught/goodSpawned : 0;
+    const barW   = W - 6;
+    // 背景
+    ctx.fillStyle='#111'; ctx.fillRect(3,3,barW,PX*3);
+    // 達成済み部分
+    const fillCol = rate>=0.8 ? '#00ff88' : (rate>=0.5 ? '#ffdd00' : '#ff6644');
+    ctx.fillStyle = fillCol;
+    ctx.fillRect(3, 3, Math.floor(barW*rate), PX*3);
+    // 80%マーカー
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(3 + Math.floor(barW*0.8), 0, 2, PX*4);
+    // ラベル
+    ctx.fillStyle='#fff';
+    ctx.font=`${PX*4}px 'Press Start 2P',monospace`;
+    ctx.fillText('80%', 3+Math.floor(barW*0.8)+4, PX*3+2);
+
+    // 回収数テキスト（左上）
+    ctx.fillStyle='#aaffcc';
+    ctx.font=`${PX*3}px 'Press Start 2P',monospace`;
+    ctx.fillText(`${goodCaught}/${goodSpawned}`, 4, PX*3+PX*5);
+
+    // 残り時間（右上、赤くカウントダウン）
+    const tCol = timeLeft<=10 ? '#ff4444' : '#ffd700';
+    ctx.fillStyle=tCol;
+    ctx.font=`${PX*4}px 'Press Start 2P',monospace`;
+    const tStr=`${timeLeft}s`;
+    ctx.fillText(tStr, W - tStr.length*PX*4 - 4, PX*3+PX*5);
+  }
+
+  // spin速度ヘルパー
+  function def_spin(isGood){ return isGood ? 0.06 : 0.12; }
+
+  gameRAF = requestAnimationFrame(tick);
+}
+
+window.addEventListener('resize',()=>{
+  if(document.getElementById('game-wrap').style.display!=='none'){
+    if(gameRAF) cancelAnimationFrame(gameRAF);
+    initGame();
+  }
+});
+</script>
+</body>
+</html>
